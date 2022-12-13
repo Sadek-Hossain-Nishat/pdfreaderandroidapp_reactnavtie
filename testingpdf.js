@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { StyleSheet, Dimensions, View, Text, Platform, Animated, PanResponder } from "react-native";
+import { StyleSheet, Dimensions, View, Text, Platform, Animated, PanResponder, TouchableOpacity } from "react-native";
 
 import Pdf from 'react-native-pdf';
 import DocumentPicker from "react-native-document-picker";
@@ -11,6 +11,7 @@ function Testingpdf() {
   const [vertValue, setVertValue] = useState(0);
   const [path, setPath] = useState("");
   const [totalPages, setTotalPages] = useState(0);
+
 
   useEffect(() => {
 
@@ -47,6 +48,15 @@ function Testingpdf() {
 
         pan.y.setValue(gestureState.dy);
 
+        // setCurrentPage(totalPages*Math.floor(pan.y.__getValue()/650))
+
+
+
+
+
+
+
+
 
         if (pan.y.__getValue()<=0) {
           setVertValue(0)
@@ -69,6 +79,12 @@ function Testingpdf() {
 
     }),
   ).current;
+
+  const changePage = () => {
+
+    this.pdf.setPage(currentPage+1)
+
+  }
 
 
 
@@ -107,19 +123,41 @@ function Testingpdf() {
   };
 
 
+
+
   return (
     <View style={styles.container}>
       <Pdf
+
+        ref={(pdf) => { this.pdf = pdf; }}
         source={{ uri: path }}
         onLoadComplete={(numberOfPages, filePath) => {
           console.log(`number of pages: ${numberOfPages}`);
           setTotalPages(numberOfPages)
 
         }}
+
+        enableAnnotationRendering={true}
+
+
+
+
+
         onPageChanged={(page, numberOfPages) => {
           console.log(`current page: ${page}`);
-          setCurrentPage(page)  //set the cuurentPage
-          pan.y.setValue((650/totalPages))
+
+          //set the cuurentPage
+          setCurrentPage(page)
+
+
+
+
+       // pan.y.setValue(pan.y.__getValue()+(650/totalPages))
+       pan.y.setValue((650/totalPages)*page)
+
+
+
+
         }}
         onError={(error) => {
           console.log(error);
@@ -141,22 +179,29 @@ function Testingpdf() {
           {...panResponder.panHandlers}
         >
 
-          <View style={{
-            height: 50,
-            backgroundColor: "rgba(173, 173, 173, 0.5)",
-            // borderRadius: 20,
-            borderBottomLeftRadius:20,
-            borderTopLeftRadius:20,
+          <TouchableOpacity onPress={changePage}>
 
 
-            width: 90,
-            justifyContent: "center",
-            alignItems: "center",
-          }}>
-            {/*<Text>{Math.floor(vertValue)}</Text>*/}
-            <Text>{currentPage}</Text>
+            <View style={{
+              height: 50,
+              backgroundColor: "rgba(173, 173, 173, 0.5)",
+              // borderRadius: 20,
+              borderBottomLeftRadius:20,
+              borderTopLeftRadius:20,
 
-          </View>
+
+              width: 50,
+              justifyContent: "center",
+              alignItems: "center",
+            }}>
+              {/*<Text>{Math.floor(vertValue)}</Text>*/}
+              <Text>{currentPage}</Text>
+
+            </View>
+
+
+          </TouchableOpacity>
+
 
 
         </Animated.View>
