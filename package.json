@@ -19,6 +19,7 @@
     "react-native-document-picker": "^8.1.1",
     "react-native-file-viewer": "^2.1.5",
     "react-native-pdf": "^6.6.2",
+    "react-native-shared-preferences": "^1.0.2",
     "react-native-splash-screen": "^3.3.0",
     "react-native-windows": "0.70.0",
     "rn-vertical-slider": "^2.0.2"

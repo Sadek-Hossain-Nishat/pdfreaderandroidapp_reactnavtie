@@ -13,6 +13,7 @@ import com.pdfreaderreactnativeapp.newarchitecture.MainApplicationReactNativeHos
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import com.vinzscam.reactnativefileviewer.RNFileViewerPackage;
+import in.sriraman.sharedpreferences.RNSharedPreferencesReactPackage;
 
 
 
@@ -31,7 +32,7 @@ public class MainApplication extends Application implements ReactApplication {
           List<ReactPackage> packages = new PackageList(this).getPackages();
 
           // Packages that cannot be autolinked yet can be added manually here, for example:
-          //packages.add(new PDFViewPackage());
+//           packages.add(new RNSharedPreferencesReactPackage() );
 
           return packages;
         }

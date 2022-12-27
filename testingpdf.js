@@ -3,6 +3,7 @@ import { StyleSheet, Dimensions, View, Text, Platform, Animated, PanResponder, T
 
 import Pdf from 'react-native-pdf';
 import DocumentPicker from "react-native-document-picker";
+import * as SharedPreferences from "react-native-shared-preferences";
 
 
 
@@ -11,6 +12,10 @@ function Testingpdf() {
   const [vertValue, setVertValue] = useState(0);
   const [path, setPath] = useState("");
   const [totalPages, setTotalPages] = useState(0);
+
+  const TOTAL_PAGES='totalpages'
+
+  SharedPreferences.setName("pdfinformation");
 
 
   useEffect(() => {
@@ -54,18 +59,29 @@ function Testingpdf() {
 
 
 
+        SharedPreferences.getItem(TOTAL_PAGES, function(value){
+          console.log(value);
+          this.pdf.setPage(((pan.y.__getValue()*parseInt(value))/650))
+
+
+          if (pan.y.__getValue()<=0) {
+            setCurrentPage(1)
+
+          }else if (pan.y.__getValue() >= 600) {
+            setCurrentPage(parseInt(value));
+          } else {
+            setCurrentPage(Math.floor(((pan.y.__getValue()*parseInt(value))/650)))
+          }
+
+
+        });
 
 
 
 
-        if (pan.y.__getValue()<=0) {
-          setVertValue(0)
 
-        }else if (pan.y.__getValue() >= 600) {
-          setVertValue(600);
-        } else {
-          setVertValue(pan.y.__getValue())
-        }
+
+
 
         console.log("y value: ", pan.y.__getValue());
 
@@ -73,8 +89,37 @@ function Testingpdf() {
 
 
       },
+      onPanResponderEnd:(e,geustureState)=>{
+
+
+        console.log("total pages,",totalPages);
+        console.log("end :",pan.y.__getValue());
+
+
+        // SharedPreferences.getItem(TOTAL_PAGES, function(value){
+        //   console.log(value);
+        //   this.pdf.setPage(((pan.y.__getValue()*parseInt(value))/650))
+        //
+        // });
+
+
+
+
+        console.log("current should be =>",((pan.y.__getValue()*totalPages)/650));
+
+
+
+
+
+
+
+
+
+      },
+
       onPanResponderRelease: () => {
         pan.flattenOffset();
+
       },
 
     }),
@@ -82,7 +127,11 @@ function Testingpdf() {
 
   const changePage = () => {
 
-    this.pdf.setPage(currentPage+1)
+    // this.pdf.setPage(currentPage+1)
+
+    this.pdf.setPage((pan.y.__getValue()*totalPages)/650)
+
+
 
   }
 
@@ -135,7 +184,11 @@ function Testingpdf() {
           console.log(`number of pages: ${numberOfPages}`);
           setTotalPages(numberOfPages)
 
+          SharedPreferences.setItem(TOTAL_PAGES,numberOfPages.toString());
+
         }}
+
+
 
         enableAnnotationRendering={true}
 
@@ -179,6 +232,11 @@ function Testingpdf() {
           {...panResponder.panHandlers}
         >
 
+
+
+
+
+
           <TouchableOpacity onPress={changePage}>
 
 
@@ -198,6 +256,8 @@ function Testingpdf() {
               <Text>{currentPage}</Text>
 
             </View>
+
+
 
 
           </TouchableOpacity>

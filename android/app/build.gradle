@@ -272,6 +272,11 @@ dependencies {
     implementation project(':react-native-file-viewer')
 
 
+
+    implementation "com.facebook.react:react-native:+"
+    implementation project(":react-native-shared-preferences")
+
+
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
