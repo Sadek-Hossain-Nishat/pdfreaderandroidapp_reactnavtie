@@ -13,6 +13,8 @@ import {
 } from "react-native";
 import DocumentPicker from "react-native-document-picker";
 import Pdf from "react-native-pdf";
+import { SafeAreaProvider } from "react-native-safe-area-context/src/SafeAreaContext";
+import { BottomNavigation } from "react-native-paper";
 
 
 
@@ -115,7 +117,7 @@ const PdfReader = () => {
 
 
 
-  const nofileYetScreen = <View style={{alignItems:'center',
+  const nofileYetScreen =<View style={{alignItems:'center',
     height:'100%',width:'100%'}}>
 
     <Image style={{height:150,width:150,marginTop:150}} source={require('./appfiles/appimages/filesimage.png')}/>
@@ -179,6 +181,9 @@ const PdfReader = () => {
   </View>
 
   return got?pdfReader:nofileYetScreen;
+
+
+
 };
 
 

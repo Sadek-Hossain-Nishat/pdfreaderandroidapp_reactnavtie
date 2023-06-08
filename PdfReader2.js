@@ -5,13 +5,13 @@ import {
   Dimensions,
   Image,
   Linking, PanResponder,
-  Platform,
+  Platform, StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
-import DocumentPicker from "react-native-document-picker";
+import DialogInput from 'react-native-dialog-input';
 import Pdf from "react-native-pdf";
 import SharedPreferences from "react-native-shared-preferences";
 
@@ -22,13 +22,22 @@ import SharedPreferences from "react-native-shared-preferences";
 
 
 
-const PdfReader2 = () => {
+
+const PdfReader2 = ({route, navigation }) => {
 
   const [path, setPath] = useState('');
   const [got, setGot] = useState(false);
   const [pageNumber, setPageNumber] = useState(0);
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0);
+
+  const [visible, setVisible] = useState(false);
+  const [input, setInput] = useState('');
+  const {uri} = route.params;
+  // setPath(uri)
+
+
+
 
 
   const TOTAL_PAGES='totalpages'
@@ -44,25 +53,23 @@ const PdfReader2 = () => {
 
     };
 
-    getUrlAsync().then(r=>{
-      if(initialUrl!=null){
-        setGot(true)
-        setPath(initialUrl)
+    getUrlAsync().then(r=> {
+        if (initialUrl != null) {
 
+          setPath(initialUrl);
+
+        }
       }
-      else selectOneFile().then(r => console.log("success"))} )
-      .catch(
-        e=> selectOneFile().then(r => console.log("success"))
-      )
+    )
 
 
 
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
+    // const backHandler = BackHandler.addEventListener(
+    //   "hardwareBackPress",
+    //   backAction
+    // );
+    //
+    // return () => backHandler.remove();
 
 
 
@@ -70,6 +77,9 @@ const PdfReader2 = () => {
 
 
   }, []);
+
+
+
 
 
 
@@ -107,10 +117,10 @@ const PdfReader2 = () => {
           if (pan.y.__getValue()<=0) {
             setCurrentPage(1)
 
-          }else if (pan.y.__getValue() >= 600) {
+          }else if (pan.y.__getValue() >= 510) {
             setCurrentPage(parseInt(value));
           } else {
-            setCurrentPage(Math.floor((pan.y.__getValue()*parseInt(value))/650))
+            setCurrentPage(Math.floor((pan.y.__getValue()*parseInt(value))/510))
           }
 
 
@@ -138,14 +148,14 @@ const PdfReader2 = () => {
 
         SharedPreferences.getItem(TOTAL_PAGES, function(value){
           console.log(value);
-          this.pdf.setPage(((pan.y.__getValue()*parseInt(value))/650))
+          this.pdf.setPage(((pan.y.__getValue()*parseInt(value))/518))
 
         });
 
 
 
 
-        console.log("current should be =>",((pan.y.__getValue()*totalPages)/650));
+        console.log("current should be =>",((pan.y.__getValue()*totalPages)/518));
 
 
 
@@ -165,12 +175,27 @@ const PdfReader2 = () => {
     }),
   ).current;
 
-  const changePage = () => {
+  const showPdfInfo = () => {
 
     // this.pdf.setPage(currentPage+1)
 
-    this.pdf.setPage((pan.y.__getValue()*totalPages)/650)
+    // this.pdf.setPage((pan.y.__getValue()*totalPages)/650)
 
+    // Alert.alert('Alert Title', 'My Alert Msg', [
+    //     //   {
+    //     //     text: 'Cancel',
+    //     //     onPress: () => console.log('Cancel Pressed'),
+    //     //     style: 'cancel',
+    //     //   },
+    //     //   {text: 'OK', onPress: () => console.log('OK Pressed')},
+    //     // ])
+
+    setVisible(true)
+
+
+
+  //   https://www.nicesnippets.com/blog/how-to-create-alert-with-textinput-in-react-native
+  //   https://www.npmjs.com/package/react-native-dialog-input
 
 
   }
@@ -178,103 +203,69 @@ const PdfReader2 = () => {
 
 
 
-  const selectOneFile = async () => {
-    // To Select File
-    try {
-      const res = await DocumentPicker.pick({
-        // Provide which type of file you want user to pick
-        type: [DocumentPicker.types.pdf],
-
-      });
-      if (res) {
-        let uriarray = res.map((file,index)=>file.uri);
-        let uri = uriarray[0]
-        setGot(true)
-        setPath(uri)
-        if (Platform.OS === 'ios') {
-          // Remove 'file://' from file path for FileViewer
-          uriarray = res.map((file,index)=>file.uri.replace('file://', ''));
-          setGot(true)
-          setPath(uri)
-        }
-        console.log('URI : ' + uri);
-
-      }
-    } catch (err) {
-      // Handling Exception
-      if (DocumentPicker.isCancel(err)) {
-        // If user canceled the document selection
-        setGot(false)
-
-      } else {
-        // For Unknown Error
-        setGot(false)
-
-        throw err;
-      }
-    }
-  };
-
-
-  const backAction = () => {
-    Alert.alert("Hold on!", "Are you sure you want to go back?", [
-      {
-        text: "Cancel",
-        onPress: () => null,
-        style: "cancel"
-      },
-      { text: "YES", onPress: () => BackHandler.exitApp() }
-    ]);
-    return true;
-  };
-
-
-
-  const nofileYetScreen = <View style={{alignItems:'center',
-    height:'100%',width:'100%'}}>
-
-    <Image style={{height:150,width:150,marginTop:150}} source={require('./appfiles/appimages/filesimage.png')}/>
-
-    <Text style={{fontWeight:'bold',fontSize:20,}}>
-      No file is selected
-    </Text>
-
-    <Text style={{fontSize:15,fontWeight:'500'}}>
-      Click the plus button to select a file
-    </Text>
-
-    <TouchableOpacity
-      style={{
-        borderWidth: 1,
-        borderColor: 'rgba(0,0,0,0.2)',
-        alignItems: 'center',
-        justifyContent: 'center',
-        width: 60,
-        position: 'absolute',
-        bottom: 10,
-        right: 10,
-        height: 60,
-        backgroundColor: '#fff',
-        borderRadius: 100,
-        marginBottom:20,
-        marginRight:20
-      }}
-      onPress={selectOneFile}
-    >
-      <Image style={{height:110,width:110}} source={require('./appfiles/appimages/floatingbutton.png')}/>
-    </TouchableOpacity>
 
 
 
 
-  </View>
+  // const backAction = () => {
+  //
+  //
+  //
+  //     Alert.alert("Hold on!", "Are you sure you want to go back?", [
+  //       {
+  //         text: "Cancel",
+  //         onPress: () => null,
+  //
+  //         style: "cancel",
+  //       },
+  //       { text: "YES", onPress: () => BackHandler.exitApp() }
+  //     ]);
+  //
+  //   return true;
+  // };
+
+  const handlebackArrow =()=>{
+
+    setGot(false)
 
 
-  const pdfReader = <View style={styles.container}>
+
+
+
+
+
+
+
+
+  }
+
+
+  const handlePageSearch =()=>{
+
+
+
+  }
+
+  const handleShare = ()=>{
+
+  }
+
+
+  const changePageNumber = (inputText) => {
+
+    
+
+
+  }
+
+  const pdfReader=<View style={styles.container}>
+    <StatusBar backgroundColor={"#1ddb82"} />
+
+
     <Pdf
 
       ref={(pdf) => { this.pdf = pdf; }}
-      source={{ uri: path }}
+      source={{ uri: uri }}
       onLoadComplete={(numberOfPages, filePath) => {
         console.log(`number of pages: ${numberOfPages}`);
         setTotalPages(numberOfPages)
@@ -301,7 +292,7 @@ const PdfReader2 = () => {
 
 
         // pan.y.setValue(pan.y.__getValue()+(650/totalPages))
-        pan.y.setValue((650/totalPages)*page)
+        pan.y.setValue((510/totalPages)*page)
 
 
 
@@ -314,12 +305,41 @@ const PdfReader2 = () => {
         console.log(`Link presse: ${uri}`)
       }}
       style={styles.pdf} />
+
+    <DialogInput
+
+
+
+
+
+
+
+
+      ref ={(dialog)=>{this.dialog = dialog}}
+
+      isDialogVisible={visible}
+      title={"Go to page"}
+      message={`1-${totalPages}\nCurrent page:${currentPage}`}
+      hintInput ={"Enter page number"}
+      submitInput={ (inputText) => {
+        if (isNaN(inputText)) setInput('Error input,enter valid page number')
+        else {
+
+          changePageNumber(inputText)
+          // setInput(inputText),
+            setVisible(false);
+
+        }
+
+      }}
+      closeDialog={() => setVisible(false)}>
+    </DialogInput>
     <View  style={styles.pageNumber}>
       <Animated.View
         style={{
           transform: [{ translateX: pan.x }, {
             translateY: pan.y.interpolate({
-              inputRange: [0, 650], outputRange: [0, 650],
+              inputRange: [0, 510], outputRange: [0, 510],
               extrapolate:  "clamp",
             }),
           }],
@@ -332,7 +352,7 @@ const PdfReader2 = () => {
 
 
 
-        <TouchableOpacity onPress={changePage}>
+        <TouchableOpacity onPress={showPdfInfo}>
 
 
           <View style={{
@@ -363,7 +383,14 @@ const PdfReader2 = () => {
     </View>
   </View>
 
-  return got?pdfReader:nofileYetScreen;
+  // return got?pdfReader:<NofileYetScreen/>;
+  return pdfReader;
+
+
+
+
+
+
 };
 
 
@@ -378,6 +405,34 @@ const styles = StyleSheet.create({
     alignItems: 'center',
 
     backfaceVisibility: 'hidden'
+  },
+  TopBarScreen:{
+    alignSelf: 'stretch',
+    height: 52,
+    flexDirection: 'row', // row
+    backgroundColor: '#1ddb82',
+    alignItems: 'center',
+    // justifyContent: 'space-between', // center, space-around
+    paddingLeft: 10,
+    paddingRight: 10,
+    titleStyle: {
+      marginLeft:10,
+      fontSize:20,
+      color:'white',
+      fontWeight:'400'
+    },
+  },
+  pdfViewTopBar:{
+
+    alignSelf: 'stretch',
+    height: 52,
+    flexDirection: 'row', // row
+    backgroundColor: '#1ddb82',
+    alignItems: 'center',
+    justifyContent: 'space-between', // center, space-around
+    paddingLeft: 10,
+    paddingRight: 10,
+
   },
   pdf: {
     flex:1,
